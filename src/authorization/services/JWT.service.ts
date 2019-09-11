@@ -2,11 +2,13 @@ import {HttpErrors} from '@loopback/rest';
 import {promisify} from 'util';
 import {TokenService} from '@loopback/authentication';
 import {securityId} from '@loopback/security';
-import {TokenServiceConstants} from '../keys';
+import {TokenServiceConstants, PasswordHasherBindings} from '../keys';
 import {MyUserProfile, Credential} from '../types';
 import {repository} from '@loopback/repository';
 import {UserRepository} from '../../repositories';
 import {User} from '../../models/user.model';
+import {PasswordHasher} from '../services/hash.password.bcryptjs';
+import {inject} from '@loopback/core';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
@@ -16,6 +18,8 @@ export class JWTService implements TokenService {
     constructor(
         @repository(UserRepository)
         public userRepository: UserRepository,
+        @inject(PasswordHasherBindings.PASSWORD_HASHER)
+        public passwordHasher: PasswordHasher,
     ) {}
 
     async verifyToken(token: string): Promise<MyUserProfile> {
@@ -59,8 +63,11 @@ export class JWTService implements TokenService {
         }
 
         const userInfoForToken = {
+            id: userProfile[securityId],
             name: userProfile.name,
             email: userProfile.email,
+            firstName: userProfile.firstName,
+            lastName: userProfile.lastName,
         };
         // Generate a JSON Web Token
         let token: string;
@@ -93,19 +100,21 @@ export class JWTService implements TokenService {
             );
         }
 
-        /*const passwordMatched = await this.passwordHasher.comparePassword(
-            credentials.password,
+        const passwordMatched = await this.passwordHasher.comparePassword(
+            credential.password,
             foundUser.password,
         );
         if (!passwordMatched) {
-            throw new HttpErrors.Unauthorized(invalidCredentialsError);
-        }*/
-
-        if (credential.password !== foundUser.password) {
             throw new HttpErrors.Unauthorized(
                 'The credentials are not correct.',
             );
         }
+
+        /*if (credential.password !== foundUser.password) {
+            throw new HttpErrors.Unauthorized(
+                'The credentials are not correct.',
+            );
+        }*/
 
         /*const currentUser: UserProfile = _.pick(toJSON(foundUser), [
             'email',

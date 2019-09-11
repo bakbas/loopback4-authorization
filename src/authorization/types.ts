@@ -13,13 +13,6 @@ export interface MyUserProfile extends UserProfile {
     email: string;
 }
 
-/*export interface MyUserProfile {
-    id: string;
-    email: string;
-    fullName: string;
-    permissions: PermissionKey[];
-}*/
-
 export interface RequiredPermissions {
     required: PermissionKey[];
 }
@@ -36,7 +29,6 @@ export const UserProfileSchema = {
             type: 'string',
             minLength: 8,
         },
-        fullName: {type: 'string'},
     },
 };
 

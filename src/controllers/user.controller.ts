@@ -12,17 +12,25 @@ import {
     CredentialsRequestBody,
     UserProfileSchema,
     JWTService,
+    PasswordHasherBindings,
+    PasswordHasher,
 } from '../authorization';
 import {authenticate, AuthenticationBindings} from '@loopback/authentication';
+import {SecurityBindings} from '@loopback/security';
 
 export class UserController {
     constructor(
         @repository(UserRepository)
         public userRepository: UserRepository,
+
         @inject(MyAuthBindings.TOKEN_SERVICE)
         public jwtService: JWTService,
-        @inject.getter(AuthenticationBindings.CURRENT_USER)
+
+        @inject.getter(SecurityBindings.USER)
         public getCurrentUser: Getter<MyUserProfile>,
+
+        @inject(PasswordHasherBindings.PASSWORD_HASHER)
+        public passwordHasher: PasswordHasher,
     ) {}
 
     /**
@@ -47,6 +55,9 @@ export class UserController {
         if (await this.userRepository.exists(user.email)) {
             throw new HttpErrors.BadRequest(`This email already exists`);
         } else {
+            user.password = await this.passwordHasher.hashPassword(
+                user.password,
+            );
             const savedUser = await this.userRepository.create(user);
             delete savedUser.password;
             return savedUser;

@@ -12,5 +12,10 @@
     },
     "include": [
         "src"
+    ],
+    "exclude": [
+      "node_modules/**",
+      "packages/*/node_modules/**",
+      "**/*.d.ts"
     ]
 }

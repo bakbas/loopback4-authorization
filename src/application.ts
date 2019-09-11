@@ -1,19 +1,21 @@
-import { BootMixin } from '@loopback/boot';
-import { ApplicationConfig } from '@loopback/core';
+import {BootMixin} from '@loopback/boot';
+import {ApplicationConfig} from '@loopback/core';
 import {
     RestExplorerBindings,
     RestExplorerComponent,
 } from '@loopback/rest-explorer';
-import { RepositoryMixin } from '@loopback/repository';
-import { RestApplication } from '@loopback/rest';
-import { ServiceMixin } from '@loopback/service-proxy';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
+import {ServiceMixin} from '@loopback/service-proxy';
 import * as path from 'path';
-import { MySequence } from './sequence';
+import {MySequence} from './sequence';
 import {
     MyAuthBindings,
     JWTService,
     JWTStrategy,
     UserPermissionsProvider,
+    PasswordHasherBindings,
+    BcryptHasher,
 } from './authorization';
 import {
     AuthenticationComponent,
@@ -31,7 +33,11 @@ export class StorylogApplication extends BootMixin(
         // Bind JWT & permission authentication strategy related elements
         registerAuthenticationStrategy(this, JWTStrategy);
         this.bind(MyAuthBindings.TOKEN_SERVICE).toClass(JWTService);
-        this.bind(MyAuthBindings.USER_PERMISSIONS).toProvider(UserPermissionsProvider);
+        this.bind(MyAuthBindings.USER_PERMISSIONS).toProvider(
+            UserPermissionsProvider,
+        );
+        this.bind(PasswordHasherBindings.ROUNDS).to(10);
+        this.bind(PasswordHasherBindings.PASSWORD_HASHER).toClass(BcryptHasher);
 
         // Set up the custom sequence
         this.sequence(MySequence);

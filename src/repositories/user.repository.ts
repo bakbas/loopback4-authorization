@@ -5,7 +5,7 @@ import {inject} from '@loopback/core';
 
 export class UserRepository extends DefaultCrudRepository<
     User,
-    typeof User.prototype.email
+    typeof User.prototype.id
 > {
     constructor(@inject('datasources.mongo') dataSource: MongoDbDataSource) {
         super(User, dataSource);
