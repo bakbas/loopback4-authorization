@@ -9,7 +9,7 @@ export interface UserPermissionsFn {
 }
 
 export interface MyUserProfile extends UserProfile {
-    permissions: String[];
+    permissions: PermissionKey[];
     email: string;
 }
 
