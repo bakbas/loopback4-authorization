@@ -9,6 +9,7 @@ import {UserRepository} from '../../repositories';
 import {User} from '../../models/user.model';
 import {PasswordHasher} from '../services/hash.password.bcryptjs';
 import {inject} from '@loopback/core';
+import {PermissionKey} from '../permission-key';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
@@ -129,18 +130,10 @@ export class JWTService implements TokenService {
     }
 
     convertToUserProfile(user: User): MyUserProfile {
-        // since first name and lastName are optional, no error is thrown if not provided
-        let userName = '';
-        if (user.firstName) userName = `${user.firstName}`;
-        if (user.lastName)
-            userName = user.firstName
-                ? `${userName} ${user.lastName}`
-                : `${user.lastName}`;
         return {
             [securityId]: user.id,
-            name: userName,
             email: user.email,
-            permissions: user.permissions,
+            permissions: user.permissions as PermissionKey[],
         };
     }
 }
